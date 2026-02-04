@@ -4,7 +4,21 @@ from app.routers.invitation import router as invitation_router
 from app.database.init_db import init_db
 
 # Create FastAPI instance
-app = FastAPI(title="Digital Invitation API")
+app = FastAPI(
+    title="Digital Invitation API",
+    description="""
+Backend API untuk sistem Undangan Digital.
+
+👤 **Author**: Bayu Wicaksono  
+📦 **Project**: Digital Invitation System  
+""",
+    version="1.0.0",
+    contact={
+        "name": "Bayu Wicaksono",
+        "email": "b.wicaksono18@gmail.com",
+        "url": "https://github.com/hellboii27"
+    }
+)
 
 # Database initialization
 @app.on_event("startup")
