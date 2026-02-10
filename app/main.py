@@ -1,55 +1,93 @@
 # digitalenv/app/main.py
 from fastapi import FastAPI
 
-# from pydantic import BaseModel
-from pydantic import BaseModel
+# Importing schemas
+from app.schemas.invitation import InvitationCreate
 
-# Initialize FastAPI app
-app = FastAPI()
+# API metadata
+tags_metadata = [
+    {
+        "name": "system",
+    }
+]
+
+# FastAPI application instance
+app = FastAPI(
+    title="Digital Invitation API",
+    description="""
+Backend API untuk sistem Undangan Digital.
+
+👤 **Author**: Bayu Wicaksono  
+📦 **Project**: Digital Invitation System  
+""",
+    version="1.0.0",
+    contact={
+        "name": "Bayu Wicaksono",
+        "email": "b.wicaksono18@gmail.com",
+        "url": "https://github.com/hellboii27"
+    },
+    openapi_tags=tags_metadata
+)
 
 # Root endpoint
-@app.get("/")
+@app.get(
+    "/",
+    tags=["system"],
+    summary="Root Endpoint",
+    description="Main endpoint for the Digital Invitation API."
+)
 async def root():
-    return {"message": "Hello world!"}
+    return {
+        "app": "Digital Invitation API",
+        "version": "1.0.0",
+        "status": "running",
+        "docs": {
+            "swagger": "/docs",
+            "redoc": "/redoc",
+            "openapi": "/openapi.json"
+        }
+    }
 
-# Users endpoints
-@app.get("/users")
-def get_users():
-    return [
-    {"id": 1, "name": "Andi"},
-    {"id": 2, "name": "Budi"}
-    ]
+# Function to determine guest category based on slug
+def kategoriTamu(slug: str):
+    pecah=slug.split("-")
+    kategori=pecah[0]
+    if kategori=="vip":
+        return {
+            "kode-tamu": pecah[1],
+            "Kategori": "VIP"
+        }
+    elif kategori=="reg":
+        return {
+            "kode-tamu": pecah[1],
+            "Kategori": "Regular"
+        }
+    else:
+        return {
+            "kode-tamu": pecah[1],
+            "Kategori": "Unknown"
+        }
 
-# Endpoint to get a specific user by name
-@app.get("/users/{user}")
-def get_user(user: str):
-    return {"name": user}
+# Invitation endpoint
+@app.get("/invitation/{slug}")
+def get_invitation(slug: str):
+    return kategoriTamu(slug)
 
-#   Schema for user creation
-class User(BaseModel):
-    name: str
-    email: str
+# Invitations endpoint with query parameters
+@app.get("/invitations")
+def get_invitations(limit: int = 10, published: bool = True):
+    return {
+        "limit": limit,
+        "published": published
+    }
 
-# Endpoint to create a new user
-@app.post("/users")
-def create_user(userdata: User):
-    return userdata
-
-# Schema for product creation
-class create_product(BaseModel):
-    id: int
-    name: str
-    price: float
-
-# Products endpoints
-@app.get("/products")
-def get_products():
-    return [
-    {"id": 1, "name": "Sabun", "price": "Rp 5.000"},
-    {"id": 2, "name": "Sampo", "price": "Rp 2.000"}
-    ]
-
-# Endpoint to create a new product
-@app.post("/products")
-def create_product(product: create_product):
-    return product
+# Endpoint to create a new invitation
+@app.post("/invitations")
+def create_invitation(invitation: InvitationCreate):
+    return {
+        "title": invitation.title,
+        "event_date": invitation.event_date,
+        "location": invitation.location,
+        "description": invitation.description,
+        "is_public": invitation.is_public
+    }
