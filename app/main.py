@@ -1,69 +1,55 @@
-# Main application file
+# digitalenv/app/main.py
 from fastapi import FastAPI
-from app.routers.invitation import router as invitation_router
-from app.database.init_db import init_db
 
-# OpenAPI tags metadata
-tags_metadata = [
-    {
-        "name": "System",
-    }
-]
+# from pydantic import BaseModel
+from pydantic import BaseModel
 
-# Create FastAPI instance
-app = FastAPI(
-    title="Digital Invitation API",
-    description="""
-Backend API untuk sistem Undangan Digital.
-
-👤 **Author**: Bayu Wicaksono  
-📦 **Project**: Digital Invitation System  
-""",
-    version="1.0.0",
-    contact={
-        "name": "Bayu Wicaksono",
-        "email": "b.wicaksono18@gmail.com",
-        "url": "https://github.com/hellboii27"
-    },
-    openapi_tags=tags_metadata
-)
-
-# Database initialization
-@app.on_event("startup")
-def on_startup():
-    init_db()
+# Initialize FastAPI app
+app = FastAPI()
 
 # Root endpoint
-@app.get(
-    "/",
-    tags=["System"],
-    summary="Root Endpoint",
-    description="Main endpoint for the Digital Invitation API."
-)
+@app.get("/")
 async def root():
-    return {
-        "app": "Digital Invitation API",
-        "version": "1.0.0",
-        "status": "running",
-        "docs": {
-            "swagger": "/docs",
-            "redoc": "/redoc",
-            "openapi": "/openapi.json"
-        }
-    }
+    return {"message": "Hello world!"}
 
-# Health check endpoint
-@app.get(
-    "/health",
-    tags=["System"],
-    summary="Health Check",
-    description="Endpoint used to verify that the API is running properly."
-)
-def health_check():
-    return {
-        "status": "ok",
-        "message": "Digital Invitation API is running"
-    }
+# Users endpoints
+@app.get("/users")
+def get_users():
+    return [
+    {"id": 1, "name": "Andi"},
+    {"id": 2, "name": "Budi"}
+    ]
 
-# Include invitation router
-app.include_router(invitation_router)
+# Endpoint to get a specific user by name
+@app.get("/users/{user}")
+def get_user(user: str):
+    return {"name": user}
+
+#   Schema for user creation
+class User(BaseModel):
+    name: str
+    email: str
+
+# Endpoint to create a new user
+@app.post("/users")
+def create_user(userdata: User):
+    return userdata
+
+# Schema for product creation
+class create_product(BaseModel):
+    id: int
+    name: str
+    price: float
+
+# Products endpoints
+@app.get("/products")
+def get_products():
+    return [
+    {"id": 1, "name": "Sabun", "price": "Rp 5.000"},
+    {"id": 2, "name": "Sampo", "price": "Rp 2.000"}
+    ]
+
+# Endpoint to create a new product
+@app.post("/products")
+def create_product(product: create_product):
+    return product
